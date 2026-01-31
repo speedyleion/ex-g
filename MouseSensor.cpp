@@ -22,7 +22,7 @@ const int tPowerUpCs = 2;
 //
 // This seems to imply that we need 20 μs before moving chip select back high,
 // so we'll cheat and re-use this value of 22 (for now?)
-const int tWµs = 22;
+const int tWus = 22;
 
 const int IDLE_READ = 0x00;
 
@@ -80,9 +80,9 @@ void MouseSensor::write(uint8_t reg, uint8_t value) {
   digitalWrite(_cs, LOW);
   SPI.beginTransaction(_settings);
   SPI.transfer((uint8_t)(0x80 | reg));
-  delayMicroseconds(tWµs);
+  delayMicroseconds(tWus);
   SPI.transfer(value);
-  delayMicroseconds(tWµs);
+  delayMicroseconds(tWus);
   SPI.endTransaction();
   digitalWrite(_cs, HIGH);
 }
@@ -91,9 +91,9 @@ uint8_t MouseSensor::read(uint8_t reg) {
   digitalWrite(_cs, LOW);
   SPI.beginTransaction(_settings);
   SPI.transfer(reg);
-  delayMicroseconds(tWµs);
+  delayMicroseconds(tWus);
   uint8_t ret_value = SPI.transfer(IDLE_READ);
-  delayMicroseconds(tWµs);
+  delayMicroseconds(tWus);
   SPI.endTransaction();
   digitalWrite(_cs, HIGH);
   return ret_value;
