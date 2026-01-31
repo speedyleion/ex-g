@@ -16,7 +16,7 @@ jobs:
         uses: arduino/setup-arduino-cli@v2
 
       - name: List arduino dirs
-        run: find ~ -name -i *arduino*
+        run: find ~ -i --name *arduino*
         
 
       - name: Cache Arduino dependencies
