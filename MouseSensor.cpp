@@ -113,24 +113,24 @@ void MouseSensor::initPmw() {
 }
 
 void MouseSensor::write(uint8_t reg, uint8_t value) {
-  digitalWrite(_cs, LOW);
   SPI.beginTransaction(_settings);
+  digitalWrite(_cs, LOW);
   SPI.transfer((uint8_t)(0x80 | reg));
   delayMicroseconds(tWus);
   SPI.transfer(value);
   delayMicroseconds(tWus);
-  SPI.endTransaction();
   digitalWrite(_cs, HIGH);
+  SPI.endTransaction();
 }
 
 uint8_t MouseSensor::read(uint8_t reg) {
-  digitalWrite(_cs, LOW);
   SPI.beginTransaction(_settings);
+  digitalWrite(_cs, LOW);
   SPI.transfer(reg);
   delayMicroseconds(tWus);
   uint8_t ret_value = SPI.transfer(IDLE_READ);
   delayMicroseconds(tWus);
-  SPI.endTransaction();
   digitalWrite(_cs, HIGH);
+  SPI.endTransaction();
   return ret_value;
 }
