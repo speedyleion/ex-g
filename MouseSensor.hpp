@@ -6,6 +6,7 @@
 class MouseSensor{
 public:
   MouseSensor(int8_t cs, uint16_t dpi, int8_t sck = -1, int8_t cipo = -1, int8_t copi = -1);
+  static uint8_t dpiToRegisterValue(uint16_t dpi);
 private:
   SPISettings _settings;
   int8_t _cs;

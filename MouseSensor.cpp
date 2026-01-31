@@ -44,17 +44,6 @@ const int MAX_DPI = 3500;
 const int DPI_RESOLUTION = 250;
 const int MAX_CLOCK_SPEED = 1'000'000;
 
-static uint8_t clampDpi(uint16_t dpi){
-    if (dpi < DPI_RESOLUTION) {
-        dpi = DPI_RESOLUTION;
-    }
-    if (dpi > MAX_DPI) {
-        dpi = MAX_DPI;
-    }
-    uint16_t steps = (dpi + (DPI_RESOLUTION / 2)) / DPI_RESOLUTION;
-    return (uint8_t)steps;
-};
-
 /**
  * @brief Construct a MouseSensor and configure SPI and sensor hardware.
  *
@@ -72,12 +61,24 @@ MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo, int8_
     SPI.begin(sck, cipo, copi);
     _settings = SPISettings(MAX_CLOCK_SPEED, SPI_MSBFIRST, SPI_MODE3);
     _cs = cs;
-    _dpi = clampDpi(dpi);
+    _dpi = dpiToRegisterValue(dpi);
 
     pinMode(_cs, OUTPUT);
     digitalWrite(_cs, HIGH);  // Deselect initially
     initPmw();
   }
+
+uint8_t MouseSensor::dpiToRegisterValue(uint16_t dpi){
+    if (dpi < DPI_RESOLUTION) {
+        dpi = DPI_RESOLUTION;
+    }
+    if (dpi > MAX_DPI) {
+        dpi = MAX_DPI;
+    }
+    uint16_t steps = (dpi + (DPI_RESOLUTION / 2)) / DPI_RESOLUTION;
+    return (uint8_t)steps;
+};
+
 
 /**
  * @brief Initializes the PMW/ADNS optical sensor and configures its operating registers.
