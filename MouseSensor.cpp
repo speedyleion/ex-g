@@ -37,13 +37,33 @@ const int DELTA_X = 0x03;
 const int DELTA_Y = 0x04;
 
 
-MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo, int8_t copi) {
+/**
+   * @brief Construct a MouseSensor and configure SPI and sensor hardware.
+   *
+   * Initializes SPI with the provided SCK/MISO/MOSI pins, applies SPI settings
+   * (1 MHz, MSB first, mode 3), stores the chip-select pin, and runs the PMW
+   * sensor initialization sequence.
+   *
+   * @param cs Chip-select pin connected to the sensor.
+   * @param dpi Sensor DPI value (logical configuration; may be used elsewhere).
+   * @param sck Serial clock pin (SCLK).
+   * @param cipo Controller-In-Peripheral-Out pin (MISO).
+   * @param copi Controller-Out-Peripheral-In pin (MOSI).
+   */
+  MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo, int8_t copi) {
     SPI.begin(sck, cipo, copi);
     _settings = SPISettings(1000000, SPI_MSBFIRST, SPI_MODE3);
     _cs = cs;
     initPmw();
   }
 
+/**
+ * @brief Initializes the PMW/ADNS optical sensor and configures its operating registers.
+ *
+ * Performs the required chip-select wake/power-up sequence and executes the sensor
+ * initialization register sequence to reset the device, configure performance and
+ * resolution, set axis control, and enable burst/motion reporting.
+ */
 void MouseSensor::initPmw() {
   // Drive High and then low from https://media.digikey.com/pdf/data%20sheets/avago%20pdfs/adns-3050.pdf
   digitalWrite(_cs, LOW);
@@ -76,6 +96,12 @@ void MouseSensor::initPmw() {
   read(DELTA_Y);
 }
 
+/**
+ * @brief Writes a byte to a sensor register over SPI.
+ *
+ * @param reg Sensor register address to write to.
+ * @param value Data byte to write into the register.
+ */
 void MouseSensor::write(uint8_t reg, uint8_t value) {
   digitalWrite(_cs, LOW);
   SPI.beginTransaction(_settings);
@@ -87,6 +113,14 @@ void MouseSensor::write(uint8_t reg, uint8_t value) {
   digitalWrite(_cs, HIGH);
 }
 
+/**
+ * @brief Read a single byte from a PMW/ADNS sensor register over SPI.
+ *
+ * Selects the sensor, issues a read for the given register address, and returns the byte read from that register.
+ *
+ * @param reg Register address to read.
+ * @return uint8_t The byte value read from the specified register.
+ */
 uint8_t MouseSensor::read(uint8_t reg) {
   digitalWrite(_cs, LOW);
   SPI.beginTransaction(_settings);
