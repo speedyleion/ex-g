@@ -1,0 +1,8 @@
+profiles:
+  esp32s3:
+    fqbn: esp32:esp32:XIAO_ESP32S3
+    notes: ESP32S3 from seeed studio. Supports USB mouse
+    platforms:
+      - platform: esp32:esp32 (3.3.5)
+    libraries:
+      - Mouse (1.0.1)
