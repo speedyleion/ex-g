@@ -51,7 +51,8 @@ static uint8_t clampDpi(uint16_t dpi){
     if (dpi > MAX_DPI) {
         dpi = MAX_DPI;
     }
-    (dpi + (DPI_RESOLUTION / 2)) / DPI_RESOLUTION;
+    uint16_t steps = (dpi + (DPI_RESOLUTION / 2)) / DPI_RESOLUTION;
+    return (uint8_t)steps;
 };
 
 MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo, int8_t copi) {
