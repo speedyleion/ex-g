@@ -1,3 +1,5 @@
+#ifndef MOUSE_SENSOR_HPP
+#define MOUSE_SENSOR_HPP
 #include <Arduino.h>
 #include <SPI.h>
 // MouseSensor 
@@ -11,3 +13,4 @@ private:
   uint8_t read(uint8_t reg);
   void write(uint8_t reg, uint8_t value);
 };
+#endif // MOUSE_SENSOR_HPP
