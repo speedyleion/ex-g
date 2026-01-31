@@ -36,11 +36,24 @@ const int MOTION = 0x02;
 const int DELTA_X = 0x03;
 const int DELTA_Y = 0x04;
 
+const int MAX_DPI = 3500;
+const int DPI_RESOLUTION = 250;
+
+static uint8_t clampDpi(uint16_t dpi){
+    if (dpi < DPI_RESOLUTION) {
+        dpi = DPI_RESOLUTION;
+    }
+    if (dpi > MAX_DPI) {
+        dpi = MAX_DPI;
+    }
+    (dpi + (DPI_RESOLUTION / 2)) / DPI_RESOLUTION;
+};
 
 MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo, int8_t copi) {
     SPI.begin(sck, cipo, copi);
     _settings = SPISettings(1000000, SPI_MSBFIRST, SPI_MODE3);
     _cs = cs;
+    _dpi = clampDpi(dpi);
     initPmw();
   }
 
@@ -67,7 +80,7 @@ void MouseSensor::initPmw() {
   write(0x67,	0x26);
   write(0x21,	0x04);
   write(PERFORMANCE, 0x00);
-  write(RESOLUTION,	0x86);
+  write(RESOLUTION,	0x80 | _dpi);
   read(AXIS_CONTROL);
   write(AXIS_CONTROL,	0xA0);
   write(BURST_READ_FIRST,	0x03);
