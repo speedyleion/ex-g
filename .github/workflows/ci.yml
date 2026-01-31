@@ -6,6 +6,26 @@ on:
   pull_request:
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install Meson and Ninja
+        run: uv tool install meson
+
+      - name: Setup build
+        run: meson setup build
+
+      - name: Run tests
+        run: meson test -C build
+
   build:
     runs-on: ubuntu-latest
 
