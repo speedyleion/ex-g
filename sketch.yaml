@@ -5,4 +5,4 @@ profiles:
     platforms:
       - platform: esp32:esp32 (3.3.5)
     libraries:
-      - Mouse (1.0.1)
+      - Adafruit TinyUSB Library (3.7.3)

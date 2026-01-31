@@ -42,7 +42,7 @@ const int DELTA_Y = 0x04;
 // As specified in https://www.epsglobal.com/Media-Library/EPSGlobal/Products/files/pixart/PMW3320DB-TYDU.pdf
 const int MAX_DPI = 3500;
 const int DPI_RESOLUTION = 250;
-const int MAX_CLOCK_SPEED = 1_000_000;
+const int MAX_CLOCK_SPEED = 1'000'000;
 
 static uint8_t clampDpi(uint16_t dpi){
     if (dpi < DPI_RESOLUTION) {
