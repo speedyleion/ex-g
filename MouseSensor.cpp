@@ -54,6 +54,9 @@ MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo, int8_
     _settings = SPISettings(1000000, SPI_MSBFIRST, SPI_MODE3);
     _cs = cs;
     _dpi = clampDpi(dpi);
+
+    pinMode(_cs, OUTPUT);
+    digitalWrite(_cs, HIGH);  // Deselect initially
     initPmw();
   }
 
