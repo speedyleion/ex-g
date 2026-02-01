@@ -2,26 +2,76 @@
 #define SPI_H_MOCK
 
 #include <cstdint>
+#include <ostream>
+#include <vector>
 
 #define SPI_MSBFIRST 1
 #define SPI_MODE3 3
 
 class SPISettings {
 public:
-    SPISettings() = default;
-    SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) {
-        (void)clock; (void)bitOrder; (void)dataMode;
-    }
+  SPISettings() = default;
+  SPISettings(uint32_t clock, uint8_t bitOrder, uint8_t dataMode) {
+    (void)clock;
+    (void)bitOrder;
+    (void)dataMode;
+  }
+};
+
+struct SPIMessage {
+  uint8_t reg;
+  uint8_t value;
+
+  bool operator==(const SPIMessage &other) const {
+    return reg == other.reg && value == other.value;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, const SPIMessage &msg) {
+    return os << "{0x" << std::hex << static_cast<int>(msg.reg) << ", 0x"
+              << static_cast<int>(msg.value) << "}";
+  }
 };
 
 class SPIClass {
 public:
-    void begin(int8_t sck = -1, int8_t miso = -1, int8_t mosi = -1) {
-        (void)sck; (void)miso; (void)mosi;
+  void begin(int8_t sck = -1, int8_t cipo = -1, int8_t copi = -1) {
+    (void)sck;
+    (void)cipo;
+    (void)copi;
+  }
+  void beginTransaction(SPISettings settings) {
+    (void)settings;
+    _inTransaction = true;
+  }
+  void endTransaction() { _inTransaction = false; }
+  uint8_t transfer(uint8_t data) {
+    if (_pendingReg < 0) {
+      _pendingReg = data;
+      _pendingInTransaction = _inTransaction;
+    } else {
+      _messages.push_back({static_cast<uint8_t>(_pendingReg), data});
+      if (!_pendingInTransaction || !_inTransaction) {
+        _hasOutOfTransactionMessage = true;
+      }
+      _pendingReg = -1;
     }
-    void beginTransaction(SPISettings settings) { (void)settings; }
-    void endTransaction() {}
-    uint8_t transfer(uint8_t data) { (void)data; return 0; }
+    return 0;
+  }
+
+  void clearMessages() {
+    _messages.clear();
+    _pendingReg = -1;
+    _hasOutOfTransactionMessage = false;
+  }
+  const std::vector<SPIMessage> &getMessages() const { return _messages; }
+  bool allMessagesInTransaction() const { return !_hasOutOfTransactionMessage; }
+
+private:
+  bool _inTransaction = false;
+  bool _pendingInTransaction = false;
+  bool _hasOutOfTransactionMessage = false;
+  int16_t _pendingReg = -1;
+  std::vector<SPIMessage> _messages;
 };
 
 extern SPIClass SPI;
