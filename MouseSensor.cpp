@@ -79,7 +79,7 @@ uint8_t MouseSensor::dpiToRegisterValue(uint16_t dpi) {
   }
   uint16_t steps = (dpi + (DPI_RESOLUTION / 2)) / DPI_RESOLUTION;
   return (uint8_t)steps;
-};
+}
 
 /**
  * @brief Initializes the PMW/ADNS optical sensor and configures its operating

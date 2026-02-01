@@ -28,7 +28,7 @@ struct SPIMessage {
 
   friend std::ostream &operator<<(std::ostream &os, const SPIMessage &msg) {
     return os << "{0x" << std::hex << static_cast<int>(msg.reg) << ", 0x"
-              << static_cast<int>(msg.value) << "}";
+              << static_cast<int>(msg.value) << std::dec << "}";
   }
 };
 
