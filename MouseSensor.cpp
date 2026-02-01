@@ -39,6 +39,7 @@ const int BURST_READ_FIRST = 0x42;
 const int MOTION = 0x02;
 const int DELTA_X = 0x03;
 const int DELTA_Y = 0x04;
+const int BURST_MOTION = 0x63;
 
 // As specified in
 // https://www.epsglobal.com/Media-Library/EPSGlobal/Products/files/pixart/PMW3320DB-TYDU.pdf
@@ -69,6 +70,27 @@ MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo,
   pinMode(_cs, OUTPUT);
   digitalWrite(_cs, HIGH); // Deselect initially
   initPmw();
+}
+
+std::optional<Motion> MouseSensor::motion() {
+  uint8_t motion_reg;
+  int8_t delta_x;
+  int8_t delta_y;
+  {
+    SpiTransaction transaction(_cs, _settings);
+    SPI.transfer(BURST_MOTION);
+    delayMicroseconds(tWus);
+    motion_reg = SPI.transfer(IDLE_READ);
+    delayMicroseconds(tWus);
+    delta_x = (int8_t)SPI.transfer(IDLE_READ);
+    delayMicroseconds(tWus);
+    delta_y = (int8_t)SPI.transfer(IDLE_READ);
+    delayMicroseconds(tWus);
+  }
+  if (motion_reg & 0x80) {
+    return Motion{delta_x, delta_y};
+  }
+  return std::nullopt;
 }
 
 uint8_t MouseSensor::dpiToRegisterValue(uint16_t dpi) {

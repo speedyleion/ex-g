@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <ostream>
+#include <queue>
 #include <vector>
 
 #define SPI_MSBFIRST 1
@@ -55,13 +56,26 @@ public:
       }
       _pendingReg = -1;
     }
+    if (!_responses.empty()) {
+      uint8_t ret = _responses.front();
+      _responses.pop();
+      return ret;
+    }
     return 0;
+  }
+
+  void queueResponse(uint8_t value) { _responses.push(value); }
+  void queueResponses(std::initializer_list<uint8_t> values) {
+    for (auto v : values) {
+      _responses.push(v);
+    }
   }
 
   void clearMessages() {
     _messages.clear();
     _pendingReg = -1;
     _hasOutOfTransactionMessage = false;
+    _responses = {};
   }
   const std::vector<SPIMessage> &getMessages() const { return _messages; }
   bool allMessagesInTransaction() const { return !_hasOutOfTransactionMessage; }
@@ -72,6 +86,7 @@ private:
   bool _hasOutOfTransactionMessage = false;
   int16_t _pendingReg = -1;
   std::vector<SPIMessage> _messages;
+  std::queue<uint8_t> _responses;
 };
 
 extern SPIClass SPI;

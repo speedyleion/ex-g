@@ -38,6 +38,43 @@ TEST_CASE("MouseSensor initializes PMW3320DB-TYDU", "[PMW-Init]") {
   REQUIRE(messages[19] == SPIMessage{0x04, 0x00}); // read(DELTA_Y)
 }
 
+TEST_CASE("motion performs burst read and returns value", "[motion]") {
+  const int8_t cs_pin = 5;
+  auto sensor = MouseSensor(cs_pin, 750);
+
+  // Clear events from init
+  Arduino.clearEvents();
+  SPI.clearMessages();
+
+  SECTION("Motion (MSB set) present in the registers") {
+    uint8_t motion_register = GENERATE(0x80, 0x81, 0x8E, 0xFF);
+    // cmd echo, motion, delta_x, delta_y
+    SPI.queueResponses({0, motion_register, 2, 3});
+
+    auto motion = sensor.motion();
+
+    REQUIRE(motion == Motion{2, 3});
+    const auto &events = Arduino.getGpioEvents();
+    REQUIRE(events.size() == 2);
+    REQUIRE(events[0] == GpioEvent{cs_pin, LOW});
+    REQUIRE(events[1] == GpioEvent{cs_pin, HIGH});
+  }
+
+  SECTION("Motion not present in the registers") {
+    uint8_t motion_register = GENERATE(0x00, 0x01, 0x7E, 0x7F);
+    // cmd echo, motion, delta_x, delta_y
+    SPI.queueResponses({0, motion_register, 2, 3});
+
+    auto motion = sensor.motion();
+
+    REQUIRE(motion == std::nullopt);
+    const auto &events = Arduino.getGpioEvents();
+    REQUIRE(events.size() == 2);
+    REQUIRE(events[0] == GpioEvent{cs_pin, LOW});
+    REQUIRE(events[1] == GpioEvent{cs_pin, HIGH});
+  }
+}
+
 TEST_CASE("read and write toggle CS appropriately", "[SPI-CS]") {
   const int8_t cs_pin = 3;
   auto sensor = MouseSensor(cs_pin, 1000);
