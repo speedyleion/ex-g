@@ -1,4 +1,4 @@
-#include "MouseSensor.hpp"
+#include "MotionSensor.hpp"
 #include "SpiTransaction.hpp"
 #include <Arduino.h>
 #include <SPI.h>
@@ -48,7 +48,7 @@ const int DPI_RESOLUTION = 250;
 const int MAX_CLOCK_SPEED = 1'000'000;
 
 /**
- * @brief Construct a MouseSensor and configure SPI and sensor hardware.
+ * @brief Construct a MotionSensor and configure SPI and sensor hardware.
  *
  * Initializes SPI with the provided SCK/CIPO/COPI pins, applies SPI settings
  * (1 MHz, MSB first, mode 3), stores the chip-select pin, and runs the PMW
@@ -60,7 +60,7 @@ const int MAX_CLOCK_SPEED = 1'000'000;
  * @param cipo Controller-In-Peripheral-Out pin (CIPO).
  * @param copi Controller-Out-Peripheral-In pin (COPI).
  */
-MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo,
+MotionSensor::MotionSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo,
                          int8_t copi) {
   SPI.begin(sck, cipo, copi);
   _settings = SPISettings(MAX_CLOCK_SPEED, SPI_MSBFIRST, SPI_MODE3);
@@ -72,7 +72,7 @@ MouseSensor::MouseSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo,
   initPmw();
 }
 
-std::optional<Motion> MouseSensor::motion() {
+std::optional<Motion> MotionSensor::motion() {
   uint8_t motion_reg;
   int8_t delta_x;
   int8_t delta_y;
@@ -93,7 +93,7 @@ std::optional<Motion> MouseSensor::motion() {
   return std::nullopt;
 }
 
-uint8_t MouseSensor::dpiToRegisterValue(uint16_t dpi) {
+uint8_t MotionSensor::dpiToRegisterValue(uint16_t dpi) {
   if (dpi < DPI_RESOLUTION) {
     dpi = DPI_RESOLUTION;
   }
@@ -113,7 +113,7 @@ uint8_t MouseSensor::dpiToRegisterValue(uint16_t dpi) {
  * performance and resolution, set axis control, and enable burst/motion
  * reporting.
  */
-void MouseSensor::initPmw() {
+void MotionSensor::initPmw() {
   // Drive High and then low from
   // https://media.digikey.com/pdf/data%20sheets/avago%20pdfs/adns-3050.pdf
   digitalWrite(_cs, LOW);
@@ -168,7 +168,7 @@ void MouseSensor::initPmw() {
  * @param reg Sensor register address to write to.
  * @param value Data byte to write into the register.
  */
-void MouseSensor::write(uint8_t reg, uint8_t value) {
+void MotionSensor::write(uint8_t reg, uint8_t value) {
   SpiTransaction transaction(_cs, _settings);
   SPI.transfer((uint8_t)(0x80 | reg));
   delayMicroseconds(tWus);
@@ -185,7 +185,7 @@ void MouseSensor::write(uint8_t reg, uint8_t value) {
  * @param reg Register address to read.
  * @return uint8_t The byte value read from the specified register.
  */
-uint8_t MouseSensor::read(uint8_t reg) {
+uint8_t MotionSensor::read(uint8_t reg) {
   SpiTransaction transaction(_cs, _settings);
   SPI.transfer(reg);
   delayMicroseconds(tWus);

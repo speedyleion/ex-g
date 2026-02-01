@@ -1,15 +1,15 @@
-#include "MouseSensor.hpp"
+#include "MotionSensor.hpp"
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-TEST_CASE("MouseSensor initializes PMW3320DB-TYDU", "[PMW-Init]") {
+TEST_CASE("MotionSensor initializes PMW3320DB-TYDU", "[PMW-Init]") {
   auto [dpi, expected_resolution] = GENERATE(table<uint16_t, uint8_t>({
       {750, 0x83},
       {1500, 0x86},
   }));
   SPI.clearMessages();
 
-  auto sensor = MouseSensor(3, dpi);
+  auto sensor = MotionSensor(3, dpi);
 
   const auto &messages = SPI.getMessages();
 
@@ -40,7 +40,7 @@ TEST_CASE("MouseSensor initializes PMW3320DB-TYDU", "[PMW-Init]") {
 
 TEST_CASE("motion performs burst read and returns value", "[motion]") {
   const int8_t cs_pin = 5;
-  auto sensor = MouseSensor(cs_pin, 750);
+  auto sensor = MotionSensor(cs_pin, 750);
 
   // Clear events from init
   Arduino.clearEvents();
@@ -77,7 +77,7 @@ TEST_CASE("motion performs burst read and returns value", "[motion]") {
 
 TEST_CASE("read and write toggle CS appropriately", "[SPI-CS]") {
   const int8_t cs_pin = 3;
-  auto sensor = MouseSensor(cs_pin, 1000);
+  auto sensor = MotionSensor(cs_pin, 1000);
 
   // Clear events from init
   Arduino.clearEvents();
@@ -107,13 +107,13 @@ TEST_CASE("dpiToRegisterValue converts DPI to register steps",
   SECTION("clamps values below minimum to 1 step") {
     auto dpi = GENERATE(0, 1, 124, 249);
     CAPTURE(dpi);
-    REQUIRE(MouseSensor::dpiToRegisterValue(dpi) == 1);
+    REQUIRE(MotionSensor::dpiToRegisterValue(dpi) == 1);
   }
 
   SECTION("clamps values above maximum to 14 steps") {
     auto dpi = GENERATE(3501, 4000, 5000, 65535);
     CAPTURE(dpi);
-    REQUIRE(MouseSensor::dpiToRegisterValue(dpi) == 14);
+    REQUIRE(MotionSensor::dpiToRegisterValue(dpi) == 14);
   }
 
   SECTION("rounds to nearest 250 DPI step") {
@@ -131,6 +131,6 @@ TEST_CASE("dpiToRegisterValue converts DPI to register steps",
         {625, 3}, // 500 + 125 -> rounds to 3
     }));
     CAPTURE(dpi);
-    REQUIRE(MouseSensor::dpiToRegisterValue(dpi) == expected);
+    REQUIRE(MotionSensor::dpiToRegisterValue(dpi) == expected);
   }
 }

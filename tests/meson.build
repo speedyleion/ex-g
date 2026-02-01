@@ -4,10 +4,10 @@ catch2_dep = dependency('catch2-with-main',
 
 subdir('mocks')
 
-test_mouse_sensor = executable('test_mouse_sensor',
-  files('test_mouse_sensor.cpp', '../MouseSensor.cpp'),
+test_motion_sensor = executable('test_motion_sensor',
+  files('test_motion_sensor.cpp', '../MotionSensor.cpp'),
   include_directories : include_directories('..'),
   dependencies : [arduino_mock_dep, catch2_dep],
 )
 
-test('test_mouse_sensor', test_mouse_sensor)
+test('test_motion_sensor', test_motion_sensor)

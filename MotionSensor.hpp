@@ -1,5 +1,5 @@
-#ifndef MOUSE_SENSOR_HPP
-#define MOUSE_SENSOR_HPP
+#ifndef MOTION_SENSOR_HPP
+#define MOTION_SENSOR_HPP
 #include <Arduino.h>
 #include <SPI.h>
 #include <cstdint>
@@ -7,23 +7,23 @@
 #include <ostream>
 
 struct Motion {
-  int delta_x;
-  int delta_y;
+  int8_t delta_x;
+  int8_t delta_y;
 
   bool operator==(const Motion &other) const {
     return delta_x == other.delta_x && delta_y == other.delta_y;
   }
 
   friend std::ostream &operator<<(std::ostream &os, const Motion &m) {
-    return os << "{dx=" << m.delta_x << ", dy=" << m.delta_y << "}";
+    return os << "{dx=" << (int)m.delta_x << ", dy=" << (int)m.delta_y << "}";
   }
 };
 
-// MouseSensor
-class MouseSensor {
+// MotionSensor
+class MotionSensor {
 public:
   /**
-   * @brief Construct a MouseSensor and configure SPI and sensor hardware.
+   * @brief Construct a MotionSensor and configure SPI and sensor hardware.
    *
    * Initializes SPI with the provided SCK/CIPO/COPI pins, applies SPI settings
    * (1 MHz, MSB first, mode 3), stores the chip-select pin, and runs the PMW
@@ -35,7 +35,7 @@ public:
    * @param cipo Controller-In-Peripheral-Out pin (CIPO).
    * @param copi Controller-Out-Peripheral-In pin (COPI).
    */
-  MouseSensor(int8_t cs, uint16_t dpi, int8_t sck = -1, int8_t cipo = -1,
+  MotionSensor(int8_t cs, uint16_t dpi, int8_t sck = -1, int8_t cipo = -1,
               int8_t copi = -1);
   /**
    * @brief Get the motion since the last time motion was retrieved
@@ -57,4 +57,4 @@ public:
   void write(uint8_t reg, uint8_t value);
   static uint8_t dpiToRegisterValue(uint16_t dpi);
 };
-#endif // MOUSE_SENSOR_HPP
+#endif // MOTION_SENSOR_HPP
