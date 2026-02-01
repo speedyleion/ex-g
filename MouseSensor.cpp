@@ -1,4 +1,5 @@
 #include "MouseSensor.hpp"
+#include "SpiTransaction.hpp"
 #include <Arduino.h>
 #include <SPI.h>
 
@@ -146,14 +147,11 @@ void MouseSensor::initPmw() {
  * @param value Data byte to write into the register.
  */
 void MouseSensor::write(uint8_t reg, uint8_t value) {
-  SPI.beginTransaction(_settings);
-  digitalWrite(_cs, LOW);
+  SpiTransaction transaction(_cs, _settings);
   SPI.transfer((uint8_t)(0x80 | reg));
   delayMicroseconds(tWus);
   SPI.transfer(value);
   delayMicroseconds(tWus);
-  digitalWrite(_cs, HIGH);
-  SPI.endTransaction();
 }
 
 /**
@@ -166,13 +164,10 @@ void MouseSensor::write(uint8_t reg, uint8_t value) {
  * @return uint8_t The byte value read from the specified register.
  */
 uint8_t MouseSensor::read(uint8_t reg) {
-  SPI.beginTransaction(_settings);
-  digitalWrite(_cs, LOW);
+  SpiTransaction transaction(_cs, _settings);
   SPI.transfer(reg);
   delayMicroseconds(tWus);
   uint8_t ret_value = SPI.transfer(IDLE_READ);
   delayMicroseconds(tWus);
-  digitalWrite(_cs, HIGH);
-  SPI.endTransaction();
   return ret_value;
 }
