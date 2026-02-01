@@ -2,11 +2,47 @@
 #define MOUSE_SENSOR_HPP
 #include <Arduino.h>
 #include <SPI.h>
+#include <cstdint>
+#include <optional>
+#include <ostream>
+
+struct Motion {
+  int delta_x;
+  int delta_y;
+
+  bool operator==(const Motion &other) const {
+    return delta_x == other.delta_x && delta_y == other.delta_y;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, const Motion &m) {
+    return os << "{dx=" << m.delta_x << ", dy=" << m.delta_y << "}";
+  }
+};
+
 // MouseSensor
 class MouseSensor {
 public:
+  /**
+   * @brief Construct a MouseSensor and configure SPI and sensor hardware.
+   *
+   * Initializes SPI with the provided SCK/CIPO/COPI pins, applies SPI settings
+   * (1 MHz, MSB first, mode 3), stores the chip-select pin, and runs the PMW
+   * sensor initialization sequence.
+   *
+   * @param cs Chip-select pin connected to the sensor.
+   * @param dpi Sensor DPI value (logical configuration; may be used elsewhere).
+   * @param sck Serial clock pin (SCLK).
+   * @param cipo Controller-In-Peripheral-Out pin (CIPO).
+   * @param copi Controller-Out-Peripheral-In pin (COPI).
+   */
   MouseSensor(int8_t cs, uint16_t dpi, int8_t sck = -1, int8_t cipo = -1,
               int8_t copi = -1);
+  /**
+   * @brief Get the motion since the last time motion was retrieved
+   *
+   * Returns the motion values from the sensor if available.
+   */
+  std::optional<Motion> motion();
 
 private:
   SPISettings _settings;
