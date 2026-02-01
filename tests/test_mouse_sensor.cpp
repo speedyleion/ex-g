@@ -38,6 +38,33 @@ TEST_CASE("MouseSensor initializes PMW3320DB-TYDU", "[PMW-Init]") {
   REQUIRE(messages[19] == SPIMessage{0x04, 0x00}); // read(DELTA_Y)
 }
 
+TEST_CASE("read and write toggle CS appropriately", "[SPI-CS]") {
+  const int8_t cs_pin = 3;
+  auto sensor = MouseSensor(cs_pin, 1000);
+
+  // Clear events from init
+  Arduino.clearEvents();
+  SPI.clearMessages();
+
+  SECTION("write pulls CS low before transfer, high after") {
+    sensor.write(0x22, 0x80);
+
+    const auto &events = Arduino.getGpioEvents();
+    REQUIRE(events.size() == 2);
+    REQUIRE(events[0] == GpioEvent{cs_pin, LOW});
+    REQUIRE(events[1] == GpioEvent{cs_pin, HIGH});
+  }
+
+  SECTION("read pulls CS low before transfer, high after") {
+    sensor.read(0x00);
+
+    const auto &events = Arduino.getGpioEvents();
+    REQUIRE(events.size() == 2);
+    REQUIRE(events[0] == GpioEvent{cs_pin, LOW});
+    REQUIRE(events[1] == GpioEvent{cs_pin, HIGH});
+  }
+}
+
 TEST_CASE("dpiToRegisterValue converts DPI to register steps",
           "[dpiToRegisterValue]") {
   SECTION("clamps values below minimum to 1 step") {

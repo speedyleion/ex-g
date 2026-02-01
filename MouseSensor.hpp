@@ -14,11 +14,11 @@ private:
   // DPI resolution in register units
   uint8_t _resolution;
   void initPmw();
-  uint8_t read(uint8_t reg);
-  void write(uint8_t reg, uint8_t value);
 
   // public for ease of testing
 public:
+  uint8_t read(uint8_t reg);
+  void write(uint8_t reg, uint8_t value);
   static uint8_t dpiToRegisterValue(uint16_t dpi);
 };
 #endif // MOUSE_SENSOR_HPP
