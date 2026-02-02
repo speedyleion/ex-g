@@ -4,3 +4,5 @@ profiles:
     notes: ESP32S3 from seeed studio. Supports USB mouse
     platforms:
       - platform: esp32:esp32 (3.3.5)
+    libraries:
+      - ESP32Encoder (0.12.0)

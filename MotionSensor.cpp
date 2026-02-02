@@ -61,7 +61,7 @@ const int MAX_CLOCK_SPEED = 1'000'000;
  * @param copi Controller-Out-Peripheral-In pin (COPI).
  */
 MotionSensor::MotionSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo,
-                         int8_t copi) {
+                           int8_t copi) {
   SPI.begin(sck, cipo, copi);
   _settings = SPISettings(MAX_CLOCK_SPEED, SPI_MSBFIRST, SPI_MODE3);
   _cs = cs;

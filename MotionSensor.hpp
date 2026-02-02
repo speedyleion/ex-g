@@ -36,7 +36,11 @@ public:
    * @param copi Controller-Out-Peripheral-In pin (COPI).
    */
   MotionSensor(int8_t cs, uint16_t dpi, int8_t sck = -1, int8_t cipo = -1,
-              int8_t copi = -1);
+               int8_t copi = -1);
+
+  MotionSensor(const MotionSensor &) = delete;
+  MotionSensor &operator=(const MotionSensor &) = delete;
+
   /**
    * @brief Get the motion since the last time motion was retrieved
    *

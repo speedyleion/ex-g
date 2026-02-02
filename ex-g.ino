@@ -1,10 +1,12 @@
 #include "MotionSensor.hpp"
+#include "ScrollWheel.hpp"
 #include <USB.h>
 #include <USBHIDMouse.h>
 #include <optional>
 
 USBHIDMouse Mouse;
 std::optional<MotionSensor> sensor;
+std::optional<ScrollWheel> scrollWheel;
 /**
  * @brief Called once at program startup to perform initialization.
  *
@@ -14,7 +16,9 @@ std::optional<MotionSensor> sensor;
 void setup() {
   Mouse.begin();
   USB.begin();
+  // D8, D9, D10 are SPI pins
   sensor.emplace(D7, 1500);
+  scrollWheel.emplace(D0, D1);
 }
 
 /**
@@ -25,7 +29,9 @@ void setup() {
  */
 void loop() {
   auto motion = sensor->motion();
-  if (motion) {
-    Mouse.move(motion->delta_x, motion->delta_y);
+  auto scroll = scrollWheel->delta();
+  if (motion || scroll) {
+    auto m = motion.value_or(Motion{0, 0});
+    Mouse.move(m.delta_x, m.delta_y, scroll.value_or(0));
   }
 }
