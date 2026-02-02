@@ -14,9 +14,8 @@ public:
    * @param a The first signal pin of the scroll wheel
    * @param b The second signal pin of the scroll wheel
    */
-  ScrollWheel(uint8_t a, uint8_t b) {
+  ScrollWheel(uint8_t a, uint8_t b) : _encoder() {
     ESP32Encoder::useInternalWeakPullResistors = puType::up;
-    _encoder = ESP32Encoder();
     _encoder.attachHalfQuad((int)a, (int)b);
   }
 
@@ -30,17 +29,16 @@ public:
    *
    * @return The scroll delta, or std::nullopt if no movement occurred.
    */
-  std::optional<int> delta() {
+  std::optional<int8_t> delta() {
     _encoder.pauseCount();
     auto count = _encoder.getCount();
     if (count != 0) {
       _encoder.clearCount();
       _encoder.resumeCount();
-      return (int)count;
+      return (int8_t)count;
     }
     _encoder.resumeCount();
     return std::nullopt;
-  }
   }
 
 private:
