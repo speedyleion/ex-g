@@ -31,12 +31,16 @@ public:
    * @return The scroll delta, or std::nullopt if no movement occurred.
    */
   std::optional<int> delta() {
+    _encoder.pauseCount();
     auto count = _encoder.getCount();
     if (count != 0) {
       _encoder.clearCount();
+      _encoder.resumeCount();
       return (int)count;
     }
+    _encoder.resumeCount();
     return std::nullopt;
+  }
   }
 
 private:
