@@ -16,7 +16,7 @@ public:
    */
   ScrollWheel(uint8_t a, uint8_t b) : _encoder() {
     ESP32Encoder::useInternalWeakPullResistors = puType::up;
-    _encoder.attachFullQuad((int)a, (int)b);
+    _encoder.attachHalfQuad((int)a, (int)b);
   }
 
   ScrollWheel(const ScrollWheel &) = delete;
