@@ -32,7 +32,7 @@ public:
   Button(uint8_t pin) : _button() {
     _button.attach(pin, INPUT_PULLUP);
     // From testing the left and right click of the ex-g were a little over
-    // 1 ms bouncing. The middle click was closer to 600ms for bouncing
+    // 1 ms bouncing. The middle click was closer to 600 micros for bouncing
     _button.interval(2);
     _button.setPressedState(LOW);
   }
