@@ -1,3 +1,4 @@
+#include "Button.hpp"
 #include "MotionSensor.hpp"
 #include "ScrollWheel.hpp"
 #include <USB.h>
@@ -7,6 +8,12 @@
 USBHIDMouse Mouse;
 std::optional<MotionSensor> sensor;
 std::optional<ScrollWheel> scrollWheel;
+std::optional<Button> buttons[3];
+const uint8_t mouseButtons[] = {MOUSE_LEFT, MOUSE_RIGHT, MOUSE_MIDDLE};
+static_assert(sizeof(buttons) / sizeof(buttons[0]) ==
+                  sizeof(mouseButtons) / sizeof(mouseButtons[0]),
+              "buttons and mouseButtons arrays must have the same count");
+
 /**
  * @brief Called once at program startup to perform initialization.
  *
@@ -19,6 +26,9 @@ void setup() {
   // D8, D9, D10 are SPI pins
   sensor.emplace(D7, 1500);
   scrollWheel.emplace(D0, D1);
+  buttons[0].emplace(D2);
+  buttons[1].emplace(D3);
+  buttons[2].emplace(D4);
 }
 
 /**
@@ -33,5 +43,16 @@ void loop() {
   if (motion || scroll) {
     auto m = motion.value_or(Motion{0, 0});
     Mouse.move(m.delta_x, m.delta_y, scroll.value_or(0));
+  }
+
+  for (size_t i = 0; i < std::size(buttons); i++) {
+    auto state = buttons[i]->stateChange();
+    if (state) {
+      if (*state == ButtonState::PRESSED) {
+        Mouse.press(mouseButtons[i]);
+      } else {
+        Mouse.release(mouseButtons[i]);
+      }
+    }
   }
 }
