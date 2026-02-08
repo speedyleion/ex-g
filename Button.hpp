@@ -29,7 +29,7 @@ public:
    *
    * @param pin The GPIO pin connected to the button
    */
-  Button(uint8_t pin) : _button(), _pressed(false) {
+  Button(uint8_t pin) : _button() {
     _button.attach(pin, INPUT_PULLUP);
     // From testing the left and right click of the ex-g were a little over
     // 1 ms bouncing. The middle click was closer to 600ms for bouncing
@@ -47,17 +47,17 @@ public:
    */
   std::optional<ButtonState> stateChange() {
     _button.update();
-    bool newPressedState = _button.pressed();
-    if (_pressed != newPressedState) {
-      _pressed = newPressedState;
-      return _pressed ? ButtonState::PRESSED : ButtonState::RELEASED;
+    if (_button.pressed()) {
+      return ButtonState::PRESSED;
+    }
+    if (_button.released()) {
+      return ButtonState::RELEASED;
     }
     return std::nullopt;
   }
 
 private:
   Bounce2::Button _button;
-  bool _pressed;
 };
 
 #endif // BUTTON_HPP
