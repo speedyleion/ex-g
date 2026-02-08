@@ -6,6 +6,13 @@
 #include <optional>
 
 USBHIDMouse Mouse;
+
+// The USB mouse takes the entire serial pipe. This prevents uploading new
+// software. To prevent needing to access the boot button of the board. This
+// flag is used to prevent the mouse logic, leaving the serial bus open.
+// This is achieved by holding down left and right click while plugging in the
+// device.
+bool serialUploadMode = false;
 std::optional<MotionSensor> sensor;
 std::optional<ScrollWheel> scrollWheel;
 std::optional<Button> buttons[3];
@@ -15,12 +22,34 @@ static_assert(sizeof(buttons) / sizeof(buttons[0]) ==
               "buttons and mouseButtons arrays must have the same count");
 
 /**
+ * @brief Check if D2 and D3 are held low for 1 second to enable serial upload
+ * mode.
+ * @return true if both buttons were held low for the full duration.
+ */
+bool checkSerialUploadMode() {
+  pinMode(D2, INPUT_PULLUP);
+  pinMode(D3, INPUT_PULLUP);
+  unsigned long start = millis();
+  while (millis() - start < 1000) {
+    if (digitalRead(D2) != LOW || digitalRead(D3) != LOW) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * @brief Called once at program startup to perform initialization.
  *
  * Place any hardware or application initialization code here; this function
  * is invoked once before the main execution loop begins.
  */
 void setup() {
+  serialUploadMode = checkSerialUploadMode();
+  if (serialUploadMode) {
+    return;
+  }
+
   Mouse.begin();
   USB.begin();
   // D8, D9, D10 are SPI pins
@@ -38,6 +67,9 @@ void setup() {
  * recurring or periodic code here. Currently the implementation is empty.
  */
 void loop() {
+  if (serialUploadMode) {
+    return;
+  }
   auto motion = sensor->motion();
   auto scroll = scrollWheel->delta();
   if (motion || scroll) {
