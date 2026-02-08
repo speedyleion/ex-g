@@ -13,9 +13,11 @@ struct MouseButton {
   std::optional<Button> button;
 };
 
-#define LEFT 0
-#define RIGHT 1
-#define MIDDLE 2
+enum MouseButtonIndex : uint8_t {
+  LEFT = 0,
+  RIGHT = 1,
+  MIDDLE = 2,
+};
 
 // The USB mouse takes the entire serial pipe, which prevents uploading new
 // software. To avoid needing to access the boot button on the board, this
@@ -32,8 +34,8 @@ MouseButton mouseButtons[] = {
 };
 
 /**
- * @brief Check if D2 and D3 are held low for 1 second to enable serial upload
- * mode.
+ * @brief Check if LEFT and RIGHT are held low for 1 second to enable serial
+ * upload mode.
  * @return true if both buttons were held low for the full duration.
  */
 bool checkSerialUploadMode() {
