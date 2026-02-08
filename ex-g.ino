@@ -7,6 +7,18 @@
 
 USBHIDMouse Mouse;
 
+struct MouseButton {
+  uint8_t pin;
+  uint8_t mouseButton;
+  std::optional<Button> button;
+};
+
+enum MouseButtonIndex : uint8_t {
+  LEFT = 0,
+  RIGHT = 1,
+  MIDDLE = 2,
+};
+
 // The USB mouse takes the entire serial pipe, which prevents uploading new
 // software. To avoid needing to access the boot button on the board, this
 // flag is used to skip the mouse logic, leaving the serial bus open.
@@ -15,23 +27,24 @@ USBHIDMouse Mouse;
 bool serialUploadMode = false;
 std::optional<MotionSensor> sensor;
 std::optional<ScrollWheel> scrollWheel;
-std::optional<Button> buttons[3];
-const uint8_t mouseButtons[] = {MOUSE_LEFT, MOUSE_RIGHT, MOUSE_MIDDLE};
-static_assert(sizeof(buttons) / sizeof(buttons[0]) ==
-                  sizeof(mouseButtons) / sizeof(mouseButtons[0]),
-              "buttons and mouseButtons arrays must have the same count");
+MouseButton mouseButtons[] = {
+    {D2, MOUSE_LEFT, {}},
+    {D3, MOUSE_RIGHT, {}},
+    {D4, MOUSE_MIDDLE, {}},
+};
 
 /**
- * @brief Check if D2 and D3 are held low for 1 second to enable serial upload
- * mode.
+ * @brief Check if LEFT and RIGHT are held low for 1 second to enable serial
+ * upload mode.
  * @return true if both buttons were held low for the full duration.
  */
 bool checkSerialUploadMode() {
-  pinMode(D2, INPUT_PULLUP);
-  pinMode(D3, INPUT_PULLUP);
+  pinMode(mouseButtons[LEFT].pin, INPUT_PULLUP);
+  pinMode(mouseButtons[RIGHT].pin, INPUT_PULLUP);
   unsigned long start = millis();
   while (millis() - start < 1000) {
-    if (digitalRead(D2) != LOW || digitalRead(D3) != LOW) {
+    if (digitalRead(mouseButtons[LEFT].pin) != LOW ||
+        digitalRead(mouseButtons[RIGHT].pin) != LOW) {
       return false;
     }
   }
@@ -55,9 +68,9 @@ void setup() {
   // D8, D9, D10 are SPI pins
   sensor.emplace(D7, 1500);
   scrollWheel.emplace(D0, D1);
-  buttons[0].emplace(D2);
-  buttons[1].emplace(D3);
-  buttons[2].emplace(D4);
+  for (auto &mb : mouseButtons) {
+    mb.button.emplace(mb.pin);
+  }
 }
 
 /**
@@ -77,13 +90,13 @@ void loop() {
     Mouse.move(m.delta_x, m.delta_y, scroll.value_or(0));
   }
 
-  for (size_t i = 0; i < std::size(buttons); i++) {
-    auto state = buttons[i]->stateChange();
+  for (auto &mb : mouseButtons) {
+    auto state = mb.button->stateChange();
     if (state) {
       if (*state == ButtonState::PRESSED) {
-        Mouse.press(mouseButtons[i]);
+        Mouse.press(mb.mouseButton);
       } else {
-        Mouse.release(mouseButtons[i]);
+        Mouse.release(mb.mouseButton);
       }
     }
   }
