@@ -7,9 +7,9 @@
 
 USBHIDMouse Mouse;
 
-// The USB mouse takes the entire serial pipe. This prevents uploading new
-// software. To prevent needing to access the boot button of the board. This
-// flag is used to prevent the mouse logic, leaving the serial bus open.
+// The USB mouse takes the entire serial pipe, which prevents uploading new
+// software. To avoid needing to access the boot button on the board, this
+// flag is used to skip the mouse logic, leaving the serial bus open.
 // This is achieved by holding down left and right click while plugging in the
 // device.
 bool serialUploadMode = false;
