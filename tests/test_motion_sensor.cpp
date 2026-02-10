@@ -54,7 +54,7 @@ TEST_CASE("motion reads registers and returns value", "[motion]") {
 
     auto motion = sensor.motion();
 
-    REQUIRE(motion == Motion{2, 3});
+    REQUIRE(motion == Motion{-3, 2});
     const auto &messages = SPI.getMessages();
     REQUIRE(messages.size() == 3);
     REQUIRE(messages[0] == SPIMessage{0x02, 0x00}); // read(MOTION)
