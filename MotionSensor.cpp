@@ -39,8 +39,6 @@ const int BURST_READ_FIRST = 0x42;
 const int MOTION = 0x02;
 const int DELTA_X = 0x03;
 const int DELTA_Y = 0x04;
-const int BURST_MOTION = 0x63;
-
 // As specified in
 // https://www.epsglobal.com/Media-Library/EPSGlobal/Products/files/pixart/PMW3320DB-TYDU.pdf
 const int MAX_DPI = 3500;
