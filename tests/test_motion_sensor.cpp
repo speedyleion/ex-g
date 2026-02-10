@@ -48,7 +48,8 @@ TEST_CASE("motion reads registers and returns value", "[motion]") {
 
   SECTION("Motion (MSB set) present in the registers") {
     uint8_t motion_register = GENERATE(0x80, 0x81, 0x8E, 0xFF);
-    // read(MOTION) returns motion_register, read(DELTA_X) returns 2, read(DELTA_Y) returns 3
+    // read(MOTION) returns motion_register, read(DELTA_X) returns 2,
+    // read(DELTA_Y) returns 3
     SPI.queueResponses({0, motion_register, 0, 2, 0, 3});
 
     auto motion = sensor.motion();
