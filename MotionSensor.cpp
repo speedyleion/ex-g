@@ -73,8 +73,9 @@ MotionSensor::MotionSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo,
 std::optional<Motion> MotionSensor::motion() {
   uint8_t motion_reg = read(MOTION);
   if (motion_reg & 0x80) {
-    int8_t delta_x = (int8_t)read(DELTA_X);
-    int8_t delta_y = (int8_t)read(DELTA_Y);
+    // We invert these to get them to be correct on the output
+    int8_t delta_y = (int8_t)read(DELTA_X);
+    int8_t delta_x = -(int8_t)read(DELTA_Y);
     return Motion{delta_x, delta_y};
   }
   return std::nullopt;
