@@ -39,8 +39,6 @@ const int BURST_READ_FIRST = 0x42;
 const int MOTION = 0x02;
 const int DELTA_X = 0x03;
 const int DELTA_Y = 0x04;
-const int BURST_MOTION = 0x63;
-
 // As specified in
 // https://www.epsglobal.com/Media-Library/EPSGlobal/Products/files/pixart/PMW3320DB-TYDU.pdf
 const int MAX_DPI = 3500;
@@ -73,21 +71,10 @@ MotionSensor::MotionSensor(int8_t cs, uint16_t dpi, int8_t sck, int8_t cipo,
 }
 
 std::optional<Motion> MotionSensor::motion() {
-  uint8_t motion_reg;
-  int8_t delta_x;
-  int8_t delta_y;
-  {
-    SpiTransaction transaction(_cs, _settings);
-    SPI.transfer(BURST_MOTION);
-    delayMicroseconds(tWus);
-    motion_reg = SPI.transfer(IDLE_READ);
-    delayMicroseconds(tWus);
-    delta_x = (int8_t)SPI.transfer(IDLE_READ);
-    delayMicroseconds(tWus);
-    delta_y = (int8_t)SPI.transfer(IDLE_READ);
-    delayMicroseconds(tWus);
-  }
+  uint8_t motion_reg = read(MOTION);
   if (motion_reg & 0x80) {
+    int8_t delta_x = (int8_t)read(DELTA_X);
+    int8_t delta_y = (int8_t)read(DELTA_Y);
     return Motion{delta_x, delta_y};
   }
   return std::nullopt;

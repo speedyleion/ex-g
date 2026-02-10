@@ -38,7 +38,7 @@ TEST_CASE("MotionSensor initializes PMW3320DB-TYDU", "[PMW-Init]") {
   REQUIRE(messages[19] == SPIMessage{0x04, 0x00}); // read(DELTA_Y)
 }
 
-TEST_CASE("motion performs burst read and returns value", "[motion]") {
+TEST_CASE("motion reads registers and returns value", "[motion]") {
   const int8_t cs_pin = 5;
   auto sensor = MotionSensor(cs_pin, 750);
 
@@ -48,26 +48,39 @@ TEST_CASE("motion performs burst read and returns value", "[motion]") {
 
   SECTION("Motion (MSB set) present in the registers") {
     uint8_t motion_register = GENERATE(0x80, 0x81, 0x8E, 0xFF);
-    // cmd echo, motion, delta_x, delta_y
-    SPI.queueResponses({0, motion_register, 2, 3});
+    // read(MOTION) returns motion_register, read(DELTA_X) returns 2,
+    // read(DELTA_Y) returns 3
+    SPI.queueResponses({0, motion_register, 0, 2, 0, 3});
 
     auto motion = sensor.motion();
 
     REQUIRE(motion == Motion{2, 3});
+    const auto &messages = SPI.getMessages();
+    REQUIRE(messages.size() == 3);
+    REQUIRE(messages[0] == SPIMessage{0x02, 0x00}); // read(MOTION)
+    REQUIRE(messages[1] == SPIMessage{0x03, 0x00}); // read(DELTA_X)
+    REQUIRE(messages[2] == SPIMessage{0x04, 0x00}); // read(DELTA_Y)
     const auto &events = Arduino.getGpioEvents();
-    REQUIRE(events.size() == 2);
+    REQUIRE(events.size() == 6);
     REQUIRE(events[0] == GpioEvent{cs_pin, LOW});
     REQUIRE(events[1] == GpioEvent{cs_pin, HIGH});
+    REQUIRE(events[2] == GpioEvent{cs_pin, LOW});
+    REQUIRE(events[3] == GpioEvent{cs_pin, HIGH});
+    REQUIRE(events[4] == GpioEvent{cs_pin, LOW});
+    REQUIRE(events[5] == GpioEvent{cs_pin, HIGH});
   }
 
   SECTION("Motion not present in the registers") {
     uint8_t motion_register = GENERATE(0x00, 0x01, 0x7E, 0x7F);
-    // cmd echo, motion, delta_x, delta_y
-    SPI.queueResponses({0, motion_register, 2, 3});
+    // read(MOTION) returns motion_register
+    SPI.queueResponses({0, motion_register});
 
     auto motion = sensor.motion();
 
     REQUIRE(motion == std::nullopt);
+    const auto &messages = SPI.getMessages();
+    REQUIRE(messages.size() == 1);
+    REQUIRE(messages[0] == SPIMessage{0x02, 0x00}); // read(MOTION)
     const auto &events = Arduino.getGpioEvents();
     REQUIRE(events.size() == 2);
     REQUIRE(events[0] == GpioEvent{cs_pin, LOW});
